@@ -12,7 +12,17 @@ namespace MediatR.Examples.AspNetCore
         {
             var writer = new WrappingWriter(Console.Out);
             var mediator = BuildMediator(writer);
-            return Runner.Run(mediator, writer, "ASP.NET Core DI");
+            try
+            {
+                var result = Runner.Run(mediator, writer, "ASP.NET Core DI");
+                Console.WriteLine("...");
+                Console.ReadKey();
+                return result;
+            }
+            catch
+            {
+                throw;
+            }
         }
 
         private static IMediator BuildMediator(WrappingWriter writer)

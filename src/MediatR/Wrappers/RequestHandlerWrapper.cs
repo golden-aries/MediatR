@@ -49,12 +49,37 @@ namespace MediatR.Wrappers
         public override Task<TResponse> Handle(IRequest<TResponse> request, CancellationToken cancellationToken,
             ServiceFactory serviceFactory)
         {
-            Task<TResponse> Handler() => GetHandler<IRequestHandler<TRequest, TResponse>>(serviceFactory).Handle((TRequest) request, cancellationToken);
+            Task<TResponse> Handler() =>
+                GetHandler<IRequestHandler<TRequest, TResponse>>(serviceFactory)
+                .Handle((TRequest) request, cancellationToken);
 
-            return serviceFactory
+            var behaviours = serviceFactory
                 .GetInstances<IPipelineBehavior<TRequest, TResponse>>()
                 .Reverse()
-                .Aggregate((RequestHandlerDelegate<TResponse>) Handler, (next, pipeline) => () => pipeline.Handle((TRequest)request, cancellationToken, next))();
+                .ToList();
+
+            //var rator = behaviours.GetEnumerator();
+            //if (rator.MoveNext())
+            //{
+            //    rator.Current
+            //    while (rator.MoveNext())
+            //    {
+            //        var previous = rator.Current;
+            //        previous.Handle
+            //        if (rator.MoveNext())
+            //        {
+
+            //        }
+            //    }
+            //}
+
+           
+            return behaviours
+                .Aggregate(
+                    (RequestHandlerDelegate<TResponse>) Handler,
+                    (next, pipeline) => () => {
+                        return pipeline.Handle((TRequest) request, cancellationToken, next);
+                    })();
         }
     }
 }
