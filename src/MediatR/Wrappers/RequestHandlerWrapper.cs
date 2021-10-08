@@ -58,28 +58,25 @@ namespace MediatR.Wrappers
                 .Reverse()
                 .ToList();
 
-            //var rator = behaviours.GetEnumerator();
-            //if (rator.MoveNext())
-            //{
-            //    rator.Current
-            //    while (rator.MoveNext())
-            //    {
-            //        var previous = rator.Current;
-            //        previous.Handle
-            //        if (rator.MoveNext())
-            //        {
+            var rator = behaviours.GetEnumerator();
 
-            //        }
-            //    }
-            //}
+            var pipeline = (RequestHandlerDelegate<TResponse>)Handler;
 
-           
-            return behaviours
-                .Aggregate(
-                    (RequestHandlerDelegate<TResponse>) Handler,
-                    (next, pipeline) => () => {
-                        return pipeline.Handle((TRequest) request, cancellationToken, next);
-                    })();
+            while (rator.MoveNext())
+            {
+                pipeline = () => rator.Current.Handle((TRequest) request, cancellationToken, pipeline);
+
+            }
+
+            return pipeline();
+
+            //return behaviours
+            //    .Aggregate(
+            //        (RequestHandlerDelegate<TResponse>) Handler,
+            //        (next, pipeline) => () =>
+            //            pipeline.Handle((TRequest) request, cancellationToken, next)
+            //        )();
+
         }
     }
 }

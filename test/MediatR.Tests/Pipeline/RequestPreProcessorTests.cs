@@ -32,7 +32,17 @@ namespace MediatR.Tests.Pipeline
         {
             public Task Process(Ping request, CancellationToken cancellationToken)
             {
-                request.Message = request.Message + " Ping";
+                request.Message = request.Message + " Pre1";
+
+                return Task.FromResult(0);
+            }
+        }
+
+        public class PingPreProcessor2 : IRequestPreProcessor<Ping>
+        {
+            public Task Process(Ping request, CancellationToken cancellationToken)
+            {
+                request.Message = request.Message + " Pre2";
 
                 return Task.FromResult(0);
             }
@@ -60,7 +70,7 @@ namespace MediatR.Tests.Pipeline
 
             var response = await mediator.Send(new Ping { Message = "Ping" });
 
-            response.Message.ShouldBe("Ping Ping Pong");
+            response.Message.ShouldBe("Ping Pre1 Pre2 Pong");
         }
 
     }
